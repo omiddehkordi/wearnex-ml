@@ -14,12 +14,12 @@ import pandas as pd
 import torch
 from PIL import Image
 
-from stylegpt.config import MODELS_DIR
-from stylegpt.data.preprocess import ClothingPreprocessor
-from stylegpt.models.classifier import ClothingClassifier
-from stylegpt.models.embeddings import EmbeddingExtractor
-from stylegpt.recommendation.engine import RecommendationEngine
-from stylegpt.training.utils import get_device
+from wearnex.config import MODELS_DIR
+from wearnex.data.preprocess import ClothingPreprocessor
+from wearnex.models.classifier import ClothingClassifier
+from wearnex.models.embeddings import EmbeddingExtractor
+from wearnex.recommendation.engine import RecommendationEngine
+from wearnex.training.utils import get_device
 
 
 class InferencePipeline:

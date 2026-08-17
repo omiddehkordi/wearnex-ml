@@ -1,7 +1,7 @@
 """Training entry point for the style-embedding model (metric learning).
 
 Usage:
-    python -m stylegpt.training.train_embeddings --data-dir data/processed/catalog --epochs 20
+    python -m wearnex.training.train_embeddings --data-dir data/processed/catalog --epochs 20
 
 `TripletCategoryDataset` samples (anchor, positive, negative) triplets
 using category as a *proxy* for visual similarity: positive = same
@@ -23,11 +23,11 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
-from stylegpt.config import DEFAULT_TRAINING_CONFIG, MODELS_DIR
-from stylegpt.data.dataset import ClothingDataset
-from stylegpt.data.preprocess import ClothingPreprocessor
-from stylegpt.models.embeddings import EmbeddingExtractor
-from stylegpt.training.utils import get_device, set_seed
+from wearnex.config import DEFAULT_TRAINING_CONFIG, MODELS_DIR
+from wearnex.data.dataset import ClothingDataset
+from wearnex.data.preprocess import ClothingPreprocessor
+from wearnex.models.embeddings import EmbeddingExtractor
+from wearnex.training.utils import get_device, set_seed
 
 
 class TripletCategoryDataset(Dataset):

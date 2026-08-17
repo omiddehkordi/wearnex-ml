@@ -13,7 +13,7 @@ import torch
 from PIL import Image
 from torchvision import transforms
 
-from stylegpt.config import IMAGE_SIZE, IMAGENET_MEAN, IMAGENET_STD
+from wearnex.config import IMAGE_SIZE, IMAGENET_MEAN, IMAGENET_STD
 
 
 def crop_to_subject(image: Image.Image, background_margin: int = 10) -> Image.Image:

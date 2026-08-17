@@ -3,7 +3,7 @@ import io
 import pytest
 from PIL import Image
 
-from stylegpt.data.io import ImageLoadError, load_image_from_bytes
+from wearnex.data.io import ImageLoadError, load_image_from_bytes
 
 
 def _png_bytes(size=(50, 80), color=(200, 0, 0)) -> bytes:

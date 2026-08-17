@@ -1,5 +1,5 @@
 [project]
-name = "stylegpt"
+name = "wearnex"
 version = "0.1.0"
 description = "Computer vision pipeline for classifying clothing and generating style recommendations"
 requires-python = ">=3.10"

@@ -1,7 +1,7 @@
 """Training entry point for the garment category classifier.
 
 Usage:
-    python -m stylegpt.training.train_classifier --data-dir data/processed/catalog --epochs 20
+    python -m wearnex.training.train_classifier --data-dir data/processed/catalog --epochs 20
 
 Expects `--data-dir` laid out as `<data-dir>/<category>/<image>.jpg`
 (see `ClothingDataset.from_folder`). Only the category head is trained
@@ -20,11 +20,11 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
 from tqdm import tqdm
 
-from stylegpt.config import DEFAULT_TRAINING_CONFIG, MODELS_DIR
-from stylegpt.data.dataset import ClothingDataset
-from stylegpt.data.preprocess import ClothingPreprocessor
-from stylegpt.models.classifier import ClothingClassifier
-from stylegpt.training.utils import get_device, set_seed
+from wearnex.config import DEFAULT_TRAINING_CONFIG, MODELS_DIR
+from wearnex.data.dataset import ClothingDataset
+from wearnex.data.preprocess import ClothingPreprocessor
+from wearnex.models.classifier import ClothingClassifier
+from wearnex.training.utils import get_device, set_seed
 
 
 def _step(model: ClothingClassifier, images: torch.Tensor, labels: torch.Tensor, criterion: nn.Module) -> tuple[torch.Tensor, torch.Tensor]:

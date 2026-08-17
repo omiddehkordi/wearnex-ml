@@ -18,8 +18,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from stylegpt.config import DEFAULT_TRAINING_CONFIG
-from stylegpt.models.backbone import build_backbone
+from wearnex.config import DEFAULT_TRAINING_CONFIG
+from wearnex.models.backbone import build_backbone
 
 
 class EmbeddingExtractor(nn.Module):

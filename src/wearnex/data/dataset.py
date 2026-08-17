@@ -15,9 +15,9 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
-from stylegpt.config import CLOTHING_CATEGORIES
-from stylegpt.data.io import ImageLoadError, list_image_paths, load_image
-from stylegpt.data.preprocess import ClothingPreprocessor
+from wearnex.config import CLOTHING_CATEGORIES
+from wearnex.data.io import ImageLoadError, list_image_paths, load_image
+from wearnex.data.preprocess import ClothingPreprocessor
 
 
 class ClothingDataset(Dataset):

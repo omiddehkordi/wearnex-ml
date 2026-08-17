@@ -1,6 +1,6 @@
 from PIL import Image
 
-from stylegpt.data.preprocess import ClothingPreprocessor, resize_with_padding
+from wearnex.data.preprocess import ClothingPreprocessor, resize_with_padding
 
 
 def test_resize_with_padding_preserves_target_size():

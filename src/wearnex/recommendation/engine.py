@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors
 
-from stylegpt.recommendation.compatibility import complementary_categories
+from wearnex.recommendation.compatibility import complementary_categories
 
 REQUIRED_METADATA_COLUMNS = {"item_id", "category", "image_path"}
 

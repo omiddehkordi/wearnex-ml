@@ -14,8 +14,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from stylegpt.config import CLOTHING_CATEGORIES, COLOR_ATTRIBUTES
-from stylegpt.models.backbone import build_backbone
+from wearnex.config import CLOTHING_CATEGORIES, COLOR_ATTRIBUTES
+from wearnex.models.backbone import build_backbone
 
 
 class ClothingClassifier(nn.Module):

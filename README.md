@@ -1,25 +1,25 @@
-# StyleGPT
+# WearNex
 
 Computer vision pipeline that classifies clothing images and generates
-style recommendations, built to eventually sit behind a user-facing web
-app.
+style recommendations, built to eventually sit behind the WearNex web
+app, with an AI persona named **JeanClaude** surfaced to users.
 
 ## Pipeline overview
 
 ```
 image (file / upload / URL)
-  -> stylegpt.data.io          load + validate bytes into a PIL image
-  -> stylegpt.data.preprocess  crop-to-subject, letterbox resize, tensor
-  -> stylegpt.models.classifier    category + color prediction
-  -> stylegpt.models.embeddings    style embedding vector
-  -> stylegpt.recommendation.engine  nearest-neighbor catalog search
-  -> stylegpt.api                  FastAPI service for the web app
+  -> wearnex.data.io          load + validate bytes into a PIL image
+  -> wearnex.data.preprocess  crop-to-subject, letterbox resize, tensor
+  -> wearnex.models.classifier    category + color prediction
+  -> wearnex.models.embeddings    style embedding vector
+  -> wearnex.recommendation.engine  nearest-neighbor catalog search
+  -> wearnex.api                  FastAPI service for the web app
 ```
 
 ## Project layout
 
 ```
-src/stylegpt/
+src/wearnex/
   config.py            paths, categories, hyperparameters
   data/
     io.py               load images from disk / bytes / URL (implemented)
@@ -72,16 +72,16 @@ pip install -e ".[dev]"
 
 ```bash
 # 1. Train the classifier
-python -m stylegpt.training.train_classifier --data-dir data/processed/catalog
+python -m wearnex.training.train_classifier --data-dir data/processed/catalog
 
 # 2. Train the style-embedding model
-python -m stylegpt.training.train_embeddings --data-dir data/processed/catalog
+python -m wearnex.training.train_embeddings --data-dir data/processed/catalog
 
 # 3. Build the recommendation index over your catalog
 python scripts/build_index.py --data-dir data/processed/catalog
 
 # 4. Serve it
-uvicorn stylegpt.api.main:app --reload
+uvicorn wearnex.api.main:app --reload
 ```
 
 ## Tests

@@ -1,7 +1,7 @@
 """FastAPI service exposing classification + recommendations to the web app.
 
 Run locally with:
-    uvicorn stylegpt.api.main:app --reload
+    uvicorn wearnex.api.main:app --reload
 
 The inference pipeline (and its model weights) is loaded lazily on
 first request rather than at import time, so the API can still start
@@ -15,13 +15,17 @@ from functools import lru_cache
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 
-from stylegpt.api.schemas import AnalyzeResponse, RecommendationsResponse
-from stylegpt.data.io import ImageLoadError, load_image_from_bytes
-from stylegpt.inference.predict import InferencePipeline
+from wearnex.api.schemas import AnalyzeResponse, RecommendationsResponse
+from wearnex.config import AI_NAME, APP_NAME
+from wearnex.data.io import ImageLoadError, load_image_from_bytes
+from wearnex.inference.predict import InferencePipeline
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="StyleGPT", description="Clothing classification and style recommendations")
+app = FastAPI(
+    title=APP_NAME,
+    description=f"Clothing classification and style recommendations, powered by {AI_NAME}.",
+)
 
 
 @lru_cache(maxsize=1)
