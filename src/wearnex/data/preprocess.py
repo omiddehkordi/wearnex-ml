@@ -69,10 +69,29 @@ def resize_with_padding(image: Image.Image, size: tuple[int, int] = IMAGE_SIZE) 
 
 
 def denoise(image: Image.Image) -> Image.Image:
-    """Light denoising for phone-camera photos (no-op for clean/studio shots)."""
+    """Light edge-preserving denoising for phone-camera grain.
+
+    Uses a bilateral filter rather than the slower non-local-means
+    denoiser since this runs on every request in the live upload path
+    (see `ClothingPreprocessor`), where per-image latency matters.
+    """
     arr = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-    arr = cv2.fastNlMeansDenoisingColored(arr, None, h=5, hColor=5, templateWindowSize=7, searchWindowSize=21)
+    arr = cv2.bilateralFilter(arr, d=9, sigmaColor=75, sigmaSpace=75)
     return Image.fromarray(cv2.cvtColor(arr, cv2.COLOR_BGR2RGB))
+
+
+def enhance_contrast(image: Image.Image, clip_limit: float = 2.0, tile_grid_size: tuple[int, int] = (8, 8)) -> Image.Image:
+    """Boost local contrast to recover detail lost to shadows or flat lighting.
+
+    Applies CLAHE to the L channel of LAB rather than per RGB channel,
+    so garment hue/saturation (used for color-attribute matching) isn't
+    skewed by the contrast adjustment.
+    """
+    l_channel, a_channel, b_channel = cv2.split(cv2.cvtColor(np.array(image), cv2.COLOR_RGB2LAB))
+    clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
+    l_channel = clahe.apply(l_channel)
+    merged = cv2.merge((l_channel, a_channel, b_channel))
+    return Image.fromarray(cv2.cvtColor(merged, cv2.COLOR_LAB2RGB))
 
 
 class ClothingPreprocessor:
@@ -89,12 +108,16 @@ class ClothingPreprocessor:
         image_size: tuple[int, int] = IMAGE_SIZE,
         mode: str = "eval",
         crop_subject: bool = True,
+        reduce_noise: bool = True,
+        boost_contrast: bool = True,
     ) -> None:
         if mode not in {"train", "eval"}:
             raise ValueError(f"mode must be 'train' or 'eval', got {mode!r}")
         self.image_size = image_size
         self.mode = mode
         self.crop_subject = crop_subject
+        self.reduce_noise = reduce_noise
+        self.boost_contrast = boost_contrast
         self._tensor_transform = self._build_tensor_transform()
 
     def _build_tensor_transform(self) -> transforms.Compose:
@@ -115,6 +138,10 @@ class ClothingPreprocessor:
         """Apply the non-tensor steps, returning a PIL image (useful for previews/debugging)."""
         if self.crop_subject:
             image = crop_to_subject(image)
+        if self.reduce_noise:
+            image = denoise(image)
+        if self.boost_contrast:
+            image = enhance_contrast(image)
         return resize_with_padding(image, self.image_size)
 
     def __call__(self, image: Image.Image) -> torch.Tensor:
