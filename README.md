@@ -1,4 +1,4 @@
-# WearNex
+# WearNex-ML
 
 Computer vision pipeline that classifies clothing images and generates
 style recommendations, built to eventually sit behind the WearNex web
