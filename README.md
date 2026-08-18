@@ -26,15 +26,15 @@ src/wearnex/
     preprocess.py        crop, resize/pad, tensor pipeline (implemented)
     dataset.py            PyTorch Dataset over a labeled image catalog
   models/
-    backbone.py          shared pretrained CNN trunk
+    backbone.py          pretrained ResNet50 trunk, used by the classifier
     classifier.py          category + color classification head
-    embeddings.py          style-embedding head for similarity search
+    embeddings.py          Marqo-FashionCLIP wrapper for style embeddings
   recommendation/
     engine.py             nearest-neighbor index over catalog embeddings
     compatibility.py        category-pairing rules ("what goes with this")
   training/
     train_classifier.py    supervised training loop for the classifier
-    train_embeddings.py     triplet-loss training loop for embeddings
+    train_embeddings.py     optional fine-tuning loop for the embedding model
   inference/
     predict.py             single entry point: image -> classification + recs
   api/
@@ -53,20 +53,26 @@ tests/                       unit tests for the implemented pieces
 ## Setup
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
+uv venv --python 3.13 .venv
+uv pip install -e ".[dev]" --python .venv/bin/python
+uv lock  # regenerate uv.lock after changing dependencies
 ```
 
 ## What's implemented vs. scaffolded
 
 - **Implemented and tested**: image loading (`data/io.py`), preprocessing
   (`data/preprocess.py`), the labeled dataset wrapper (`data/dataset.py`).
-- **Structured but untrained**: the classifier and embedding model
-  architectures, training loops, and recommendation engine are complete,
-  runnable code — but the models need real labeled data
+- **Embeddings — pretrained, usable out of the box**: `models/embeddings.py`
+  wraps Marqo-FashionCLIP, so style embeddings and similarity search work
+  without training anything. `training/train_embeddings.py` is only for
+  optionally fine-tuning that pretrained space onto your own catalog/photos
+  later (see the module docstring).
+- **Structured but untrained**: the classifier architecture, its training
+  loop, and the recommendation engine are complete, runnable code — but the
+  classifier needs real labeled data
   (e.g. [DeepFashion](https://github.com/switchablenorms/DeepFashion2))
-  before predictions are meaningful. Point `--data-dir` at a folder laid
-  out as `<category>/<image>.jpg` to train.
+  before category/color predictions are meaningful. Point `--data-dir` at a
+  folder laid out as `<category>/<image>.jpg` to train.
 
 ## Typical workflow
 
@@ -74,7 +80,7 @@ pip install -e ".[dev]"
 # 1. Train the classifier
 python -m wearnex.training.train_classifier --data-dir data/processed/catalog
 
-# 2. Train the style-embedding model
+# 2. (optional) fine-tune the pretrained embedding model on your own catalog
 python -m wearnex.training.train_embeddings --data-dir data/processed/catalog
 
 # 3. Build the recommendation index over your catalog

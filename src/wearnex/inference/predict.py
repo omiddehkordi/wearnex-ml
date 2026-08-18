@@ -26,7 +26,6 @@ class InferencePipeline:
     def __init__(
         self,
         classifier_path: str | Path = MODELS_DIR / "classifier.pt",
-        embedding_model_path: str | Path = MODELS_DIR / "embeddings.pt",
         recommendation_index_path: str | Path = MODELS_DIR / "recommendation_index.pkl",
         device: torch.device | None = None,
     ) -> None:
@@ -34,7 +33,7 @@ class InferencePipeline:
         self.preprocessor = ClothingPreprocessor(mode="eval")
 
         self.classifier = ClothingClassifier.load(classifier_path, map_location=str(self.device)).to(self.device)
-        self.embedder = EmbeddingExtractor.load(embedding_model_path, map_location=str(self.device)).to(self.device)
+        self.embedder = EmbeddingExtractor().to(self.device)
         self.recommender = RecommendationEngine.load(recommendation_index_path)
 
     def _to_batch(self, image: Image.Image) -> torch.Tensor:
@@ -45,8 +44,7 @@ class InferencePipeline:
         return self.classifier.predict(batch, top_k=3)[0]
 
     def embed(self, image: Image.Image):
-        batch = self._to_batch(image)
-        return self.embedder.encode(batch)[0]
+        return self.embedder.encode_images([image])[0]
 
     def recommend_similar(self, image: Image.Image, k: int = 10) -> pd.DataFrame:
         embedding = self.embed(image)

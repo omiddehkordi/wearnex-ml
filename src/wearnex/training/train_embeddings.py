@@ -1,7 +1,14 @@
-"""Training entry point for the style-embedding model (metric learning).
+"""Fine-tuning entry point for the style-embedding model (metric learning).
 
 Usage:
-    python -m wearnex.training.train_embeddings --data-dir data/processed/catalog --epochs 20
+    python -m wearnex.training.train_embeddings --data-dir data/processed/catalog --epochs 5
+
+`EmbeddingExtractor` already wraps Marqo-FashionCLIP, pretrained on
+fashion product data -- this script is only needed if that pretrained
+space needs domain-adapting to your own catalog/photos (e.g. real
+user-uploaded closet photos rather than studio product shots). Only
+the image tower is unfrozen: we never call `encode_text`, so the text
+tower stays frozen and untouched.
 
 `TripletCategoryDataset` samples (anchor, positive, negative) triplets
 using category as a *proxy* for visual similarity: positive = same
@@ -25,7 +32,7 @@ from tqdm import tqdm
 
 from wearnex.config import DEFAULT_TRAINING_CONFIG, MODELS_DIR
 from wearnex.data.dataset import ClothingDataset
-from wearnex.data.preprocess import ClothingPreprocessor
+from wearnex.models.backbone import freeze, unfreeze
 from wearnex.models.embeddings import EmbeddingExtractor
 from wearnex.training.utils import get_device, set_seed
 
@@ -78,23 +85,29 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-dir", type=Path, required=True)
     parser.add_argument("--output", type=Path, default=MODELS_DIR / "embeddings.pt")
-    parser.add_argument("--epochs", type=int, default=DEFAULT_TRAINING_CONFIG.num_epochs)
+    parser.add_argument("--epochs", type=int, default=5, help="Fine-tuning needs far fewer epochs than training from scratch.")
     parser.add_argument("--batch-size", type=int, default=DEFAULT_TRAINING_CONFIG.batch_size)
-    parser.add_argument("--lr", type=float, default=DEFAULT_TRAINING_CONFIG.learning_rate)
+    parser.add_argument("--lr", type=float, default=1e-5, help="Kept low to avoid destroying the pretrained embedding space.")
     parser.add_argument("--margin", type=float, default=0.2)
-    parser.add_argument("--embedding-dim", type=int, default=DEFAULT_TRAINING_CONFIG.embedding_dim)
     parser.add_argument("--seed", type=int, default=DEFAULT_TRAINING_CONFIG.seed)
     args = parser.parse_args()
 
     set_seed(args.seed)
     device = get_device()
 
-    base_dataset = ClothingDataset.from_folder(args.data_dir, preprocessor=ClothingPreprocessor(mode="train"))
+    model = EmbeddingExtractor().to(device)
+    freeze(model.model)
+    unfreeze(model.model.visual)
+
+    base_dataset = ClothingDataset.from_folder(args.data_dir, preprocessor=model.preprocess_image)
     triplet_dataset = TripletCategoryDataset(base_dataset)
     loader = DataLoader(triplet_dataset, batch_size=args.batch_size, shuffle=True, num_workers=DEFAULT_TRAINING_CONFIG.num_workers)
 
-    model = EmbeddingExtractor(embedding_dim=args.embedding_dim).to(device)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=DEFAULT_TRAINING_CONFIG.weight_decay)
+    optimizer = torch.optim.AdamW(
+        (p for p in model.parameters() if p.requires_grad),
+        lr=args.lr,
+        weight_decay=DEFAULT_TRAINING_CONFIG.weight_decay,
+    )
     criterion = nn.TripletMarginLoss(margin=args.margin)
 
     for epoch in range(1, args.epochs + 1):

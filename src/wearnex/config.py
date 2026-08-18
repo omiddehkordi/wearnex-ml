@@ -60,7 +60,6 @@ class TrainingConfig:
     num_workers: int = 4
     val_split: float = 0.15
     seed: int = 42
-    embedding_dim: int = 128
     categories: list[str] = field(default_factory=lambda: list(CLOTHING_CATEGORIES))
 
 

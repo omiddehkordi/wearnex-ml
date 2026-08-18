@@ -10,14 +10,18 @@ up in both layouts in practice:
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Callable
 
 import pandas as pd
 import torch
+from PIL import Image
 from torch.utils.data import Dataset
 
 from wearnex.config import CLOTHING_CATEGORIES
 from wearnex.data.io import ImageLoadError, list_image_paths, load_image
 from wearnex.data.preprocess import ClothingPreprocessor
+
+Preprocessor = Callable[[Image.Image], torch.Tensor]
 
 
 class ClothingDataset(Dataset):
@@ -31,7 +35,7 @@ class ClothingDataset(Dataset):
         self,
         samples: list[tuple[Path, int]],
         class_to_idx: dict[str, int],
-        preprocessor: ClothingPreprocessor | None = None,
+        preprocessor: Preprocessor | None = None,
     ) -> None:
         self.class_to_idx = class_to_idx
         self.idx_to_class = {idx: name for name, idx in class_to_idx.items()}
@@ -52,7 +56,7 @@ class ClothingDataset(Dataset):
     def from_folder(
         cls,
         root_dir: str | Path,
-        preprocessor: ClothingPreprocessor | None = None,
+        preprocessor: Preprocessor | None = None,
     ) -> "ClothingDataset":
         """Build from a directory laid out as `root_dir/<category>/<image>.jpg`."""
         root_dir = Path(root_dir)
@@ -71,7 +75,7 @@ class ClothingDataset(Dataset):
         cls,
         csv_path: str | Path,
         image_root: str | Path,
-        preprocessor: ClothingPreprocessor | None = None,
+        preprocessor: Preprocessor | None = None,
         path_column: str = "image_path",
         label_column: str = "category",
         categories: list[str] = CLOTHING_CATEGORIES,

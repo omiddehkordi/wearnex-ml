@@ -2,7 +2,6 @@
 
 Usage:
     python scripts/build_index.py --data-dir data/processed/catalog \
-        --embedding-model models_store/embeddings.pt \
         --classifier models_store/classifier.pt \
         --output models_store/recommendation_index.pkl
 
@@ -34,7 +33,6 @@ from wearnex.training.utils import get_device
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-dir", type=Path, required=True)
-    parser.add_argument("--embedding-model", type=Path, default=MODELS_DIR / "embeddings.pt")
     parser.add_argument("--classifier", type=Path, default=MODELS_DIR / "classifier.pt")
     parser.add_argument("--output", type=Path, default=MODELS_DIR / "recommendation_index.pkl")
     parser.add_argument("--batch-size", type=int, default=32)
@@ -42,7 +40,7 @@ def main() -> None:
 
     device = get_device()
     preprocessor = ClothingPreprocessor(mode="eval")
-    embedder = EmbeddingExtractor.load(args.embedding_model, map_location=str(device)).to(device)
+    embedder = EmbeddingExtractor().to(device)
     classifier = ClothingClassifier.load(
         args.classifier, map_location=str(device), num_categories=len(CLOTHING_CATEGORIES)
     ).to(device)
@@ -57,10 +55,10 @@ def main() -> None:
     for i in tqdm(range(0, len(paths), args.batch_size), desc="embedding catalog"):
         batch_paths = paths[i:i + args.batch_size]
         images = [load_image(p) for p in batch_paths]
-        batch = torch.stack([preprocessor(img) for img in images]).to(device)
+        classifier_batch = torch.stack([preprocessor(img) for img in images]).to(device)
 
-        batch_embeddings = embedder.encode(batch)
-        batch_predictions = classifier.predict(batch, top_k=1)
+        batch_embeddings = embedder.encode_images(images)
+        batch_predictions = classifier.predict(classifier_batch, top_k=1)
 
         for path, embedding, prediction in zip(batch_paths, batch_embeddings, batch_predictions):
             records.append({
