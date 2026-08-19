@@ -50,6 +50,45 @@ COLOR_ATTRIBUTES = [
     "purple", "pink", "multicolor",
 ]
 
+# Style/vibe tags usable as a secondary item attribute (distinct from
+# OUTFIT_SLOTS below, which is about outfit *structure*, not aesthetics).
+OUTFIT_STYLES = [
+    "casual", "formal", "sporty", "business",
+    "sleepwear", "loungewear", "swimwear", "snowwear",
+]
+
+OCCASION_CATEGORIES = [
+    "work", "wedding", "vacation", "gym", "date",
+    "night_out", "beach", "party", "hiking", "skiing",
+    "running", "cycling", "travel", "concert", "festival",
+    "holiday", "casual_outing",
+]
+
+SEASON_CATEGORIES = ["spring", "summer", "fall", "winter"]
+
+# The structural positions an outfit assembler fills, and which
+# CLOTHING_CATEGORIES entry belongs in each. "dress" is its own slot
+# since a dress fills both "top" and "bottom" at once.
+OUTFIT_SLOTS = ["top", "bottom", "dress", "outerwear", "footwear", "bag", "headwear", "accessory"]
+
+CATEGORY_TO_SLOT: dict[str, str] = {
+    "t_shirt": "top",
+    "shirt": "top",
+    "sweater": "top",
+    "hoodie": "top",
+    "jacket": "outerwear",
+    "coat": "outerwear",
+    "dress": "dress",
+    "skirt": "bottom",
+    "shorts": "bottom",
+    "pants": "bottom",
+    "jeans": "bottom",
+    "shoes": "footwear",
+    "bag": "bag",
+    "hat": "headwear",
+    "accessory": "accessory",
+}
+
 
 @dataclass(frozen=True)
 class TrainingConfig:

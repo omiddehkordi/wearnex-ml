@@ -32,3 +32,23 @@ class AnalyzeResponse(BaseModel):
 
 class RecommendationsResponse(BaseModel):
     items: list[RecommendedItem]
+
+
+class OutfitRequest(BaseModel):
+    """Assemble an outfit from a set of candidate items (e.g. a user's closet)."""
+
+    item_ids: list[str]
+    occasion: str | None = None
+    season: str | None = None
+    num_outfits: int = 1
+
+
+class Outfit(BaseModel):
+    slots: dict[str, RecommendedItem]
+    score: float
+
+
+class OutfitResponse(BaseModel):
+    occasion: str | None
+    season: str | None
+    outfits: list[Outfit]
